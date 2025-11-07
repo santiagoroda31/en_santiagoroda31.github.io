@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portafolio – Santiago Rodríguez Ávila</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0; 
+  font-family:'Inter',sans-serif;
+  background:#fafafa;
+  color:#222;
+}
+.container {
+  max-width:1000px;
+  margin:auto;
+  padding:40px 20px;
+}
+h1 {
+  font-size:38px;
+  font-weight:800;
+  margin-bottom:6px;
+}
+.subtitle {
+  font-size:20px;
+  font-weight:500;
+  color:#c41230;
+  margin-bottom:30px;
+}
+p {
+  font-size:18px;
+  line-height:1.6;
+  margin-bottom:18px;
+}
+a.social {
+  font-size:18px;
+  font-weight:600;
+  color:#1d9bf0;
+  text-decoration:none;
+}
+a.social:hover {
+  text-decoration:underline;
+}
+.section-title {
+  font-size:26px;
+  font-weight:700;
+  margin-top:45px;
+  margin-bottom:12px;
+}
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:18px;
+  margin-top:20px;
+}
+.card {
+  background:#fff;
+  border:1px solid #eee;
+  padding:18px;
+  border-radius:10px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.06);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.card h3 {
+  font-size:17px;
+  font-weight:600;
+  margin-bottom:14px;
+}
+.card a {
+  display:inline-block;
+  margin-top:auto;
+  background:#c41230;
+  color:white;
+  padding:8px 14px;
+  border-radius:6px;
+  text-decoration:none;
+  font-weight:600;
+  white-space:normal;
+  overflow-wrap:break-word;
+  word-break:break-word;
+}
+.card a:hover {
+  background:#9d0f26;
+}
+.loader {
+  text-align:center;
+  margin-top:40px;
+  font-size:18px;
+  font-weight:600;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>Santiago Rodríguez Ávila</h1>
+<div class="subtitle">Periodista y Redactor</div>
+
+<p>
+La manera en que consumimos información y contamos noticias ha evolucionado radicalmente. La labor periodística ya no solo se trata de informar: Debemos interpretar, contextualizar y darle significado a lo que ocurre a nuestro alrededor. Hoy, más que nunca, las palabras son puentes entre la realidad y quienes buscan entenderla.
+</p>
+
+<p>
+Soy Santiago Rodríguez Ávila, periodista y redactor de historias. Mi trabajo se mueve entre el deporte, la actualidad global, las tendencias culturales y los temas que marcan conversación en el mundo. Cada nota que verás aquí nace de una mezcla entre el análisis y la pasión por transformar hechos en relatos.
+</p>
+
+<p>
+Mis redes sociales:  
+<br>
+</p>
+
+<div class="section-title">Articles</div>
+
+<div id="articles" class="grid"></div>
+<div id="loader" class="loader">Cargando artículos...</div>
+
+</div>
+
+<script>
+fetch("notas_santiago.json")
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById("loader").style.display = "none";
+    let html = "";
+    data.forEach(item => {
+      html += `
+      <div class="card">
+        <h3>${item.title}</h3>
+        <a href="${item.url}" target="_blank">Leer artículo</a>
+      </div>
+      `;
+    });
+    document.getElementById("articles").innerHTML = html;
+  })
+  .catch(err => {
+    document.getElementById("loader").innerText = "Error cargando artículos";
+    console.error(err);
+  });
+</script>
+
+</body>
+</html>
