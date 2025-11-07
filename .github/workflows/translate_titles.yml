@@ -4,45 +4,64 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "notas_santiago.json"
 
 jobs:
   translate:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
           pip install deep-translator
 
-      - name: Translate titles
+      - name: Translate titles and write notas_santiago_en.json
+        # run the block with the Python shell so 'import' works
+        shell: python
         run: |
           import json
           from deep_translator import GoogleTranslator
 
-          with open('notas_santiago.json', 'r', encoding='utf-8') as f:
+          # Load original JSON (expects a list of objects like { "title": "...", "url": "..." })
+          with open("notas_santiago.json", "r", encoding="utf-8") as f:
               data = json.load(f)
 
+          # Translate titles one by one (literal translation)
+          translator = GoogleTranslator(source="es", target="en")
+          translated_count = 0
           for item in data:
-              if 'title' in item and item['title'].strip():
+              if isinstance(item, dict) and "title" in item and item["title"].strip():
                   try:
-                      item['title'] = GoogleTranslator(source='es', target='en').translate(item['title'])
+                      item["title"] = translator.translate(item["title"])
+                      translated_count += 1
                   except Exception as e:
-                      print(f"Error translating: {item['title'][:60]}... -> {e}")
+                      # don't stop the job on one failure; log and continue
+                      print(f"Error translating title (skipping): {item.get('title', '')[:60]}... -> {e}")
 
-          with open('notas_santiago.json', 'w', encoding='utf-8') as f:
+          # Save translated output as a NEW file to keep original intact
+          with open("notas_santiago_en.json", "w", encoding="utf-8") as f:
               json.dump(data, f, ensure_ascii=False, indent=2)
 
-      - name: Commit and push changes
+          print(f"Translated titles: {translated_count}")
+
+      - name: Commit and push translated file (only if changed)
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add notas_santiago.json
-          git commit -m "Translated titles to English"
-          git push
+          git add notas_santiago_en.json
+          # If there are staged changes, commit and push; otherwise do nothing
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Add/update notas_santiago_en.json (translated titles)"
+            git push
+          fi
