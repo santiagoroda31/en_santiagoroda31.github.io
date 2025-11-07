@@ -24,7 +24,7 @@ jobs:
         run: |
           pip install deep-translator
 
-      - name: Translate titles and write notas_santiago_en.json
+      - name: Translate titles and write notas_santiago.json
         # run the block with the Python shell so 'import' works
         shell: python
         run: |
@@ -48,7 +48,7 @@ jobs:
                       print(f"Error translating title (skipping): {item.get('title', '')[:60]}... -> {e}")
 
           # Save translated output as a NEW file to keep original intact
-          with open("notas_santiago_en.json", "w", encoding="utf-8") as f:
+          with open("notas_santiago.json", "w", encoding="utf-8") as f:
               json.dump(data, f, ensure_ascii=False, indent=2)
 
           print(f"Translated titles: {translated_count}")
@@ -57,11 +57,11 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add notas_santiago_en.json
+          git add notas_santiago.json
           # If there are staged changes, commit and push; otherwise do nothing
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "Add/update notas_santiago_en.json (translated titles)"
+            git commit -m "Add/update notas_santiago.json (translated titles)"
             git push
           fi
