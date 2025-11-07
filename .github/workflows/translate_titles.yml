@@ -8,40 +8,41 @@ on:
 jobs:
   translate:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
-          pip install googletrans==4.0.0-rc1
+          pip install deep-translator
 
-      - name: Translate titles in notas_santiago.json
+      - name: Translate titles
         run: |
           import json
-          from googletrans import Translator
+          from deep_translator import GoogleTranslator
 
-          translator = Translator()
-          with open("notas_santiago.json", "r", encoding="utf-8") as f:
+          with open('notas_santiago.json', 'r', encoding='utf-8') as f:
               data = json.load(f)
 
           for item in data:
-              item["title"] = translator.translate(item["title"], src="es", dest="en").text
+              if 'title' in item and item['title'].strip():
+                  try:
+                      item['title'] = GoogleTranslator(source='es', target='en').translate(item['title'])
+                  except Exception as e:
+                      print(f"Error translating: {item['title'][:60]}... -> {e}")
 
-          with open("notas_santiago.json", "w", encoding="utf-8") as f:
+          with open('notas_santiago.json', 'w', encoding='utf-8') as f:
               json.dump(data, f, ensure_ascii=False, indent=2)
-        shell: python
 
       - name: Commit and push changes
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
           git add notas_santiago.json
-          git commit -m "Translate titles to English"
+          git commit -m "Translated titles to English"
           git push
